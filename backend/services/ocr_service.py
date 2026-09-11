@@ -10,8 +10,11 @@ load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
+
 if not GROQ_API_KEY:
-    raise RuntimeError("GROQ_API_KEY not found in backend/.env")
+    raise RuntimeError(
+        "GROQ_API_KEY not found in backend/.env"
+    )
 
 
 client = Groq(api_key=GROQ_API_KEY)
@@ -48,29 +51,26 @@ def extract_text(image_path):
     mime_type = get_mime_type(image_path)
 
     prompt = """
-Read the medicine or supplement label in this image.
+Read the uploaded medicine or supplement label.
 
-Extract all clearly readable text from the label.
+Extract only clearly readable text.
 
-Preserve:
+Focus on:
 - product name
 - strength
 - ingredients
 - directions
 - warnings
-- storage instructions
-- batch number
-- manufacturing date
-- expiry date
-- manufacturer
-- other clearly visible label text
+- storage
+- important label instructions
+
+Preserve numbers and units.
 
 Do not guess unreadable text.
-
-Return plain text only.
 Do not summarize.
-Do not interpret the medicine.
 Do not give medical advice.
+
+Return concise plain text only.
 """
 
     response = client.chat.completions.create(
@@ -96,7 +96,8 @@ Do not give medical advice.
             }
         ],
         temperature=0,
-        max_completion_tokens=4096,
+        reasoning_effort="none",
+        max_completion_tokens=900,
     )
 
     result = response.choices[0].message.content

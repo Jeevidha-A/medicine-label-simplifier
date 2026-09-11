@@ -9,3 +9,4 @@ pydantic
 python-dotenv
 groq
 clerk-backend-api
+sqlalchemy

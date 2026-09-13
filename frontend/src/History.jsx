@@ -22,7 +22,7 @@ function History() {
         if (err.response?.data?.detail) {
           setError(err.response.data.detail);
         } else {
-          setError("Failed to load history.");
+          setError("Failed to load medicine history.");
         }
       } finally {
         setLoading(false);
@@ -33,52 +33,138 @@ function History() {
   }, [getToken]);
 
   if (loading) {
-    return <p>Loading history...</p>;
+    return (
+      <div className="history-loading">
+        <div className="history-spinner"></div>
+        <h2>Loading your medicines...</h2>
+        <p>Please wait while we retrieve your history.</p>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h2>Analysis History</h2>
+    <section className="history-page">
 
-      {error && <p>{error}</p>}
+      {/* HEADER */}
 
-      {!error && history.length === 0 && (
-        <p>No medicine analyses found.</p>
-      )}
+      <div className="history-header">
 
-      {history.length > 0 && (
         <div>
-          {history.map((item) => (
-            <div key={item.id}>
-              <h3>
-                {item.medicine_name || "Unknown Medicine"}
-              </h3>
+          <span className="history-badge">
+            📚 Saved Information
+          </span>
 
-              <p>
-                <strong>Strength:</strong>{" "}
-                {item.strength || "Not available"}
-              </p>
+          <h2>My Medicine History</h2>
 
-              <p>
-                <strong>Form:</strong>{" "}
-                {item.form || "Not available"}
-              </p>
+          <p>
+            View the medicine labels you have analyzed previously.
+          </p>
+        </div>
 
-              <p>
-                <strong>File:</strong> {item.filename}
-              </p>
+        <div className="history-count">
+          <strong>{history.length}</strong>
+          <span>Analyses</span>
+        </div>
 
-              <p>
-                <strong>Date:</strong>{" "}
-                {item.created_at
-                  ? new Date(item.created_at).toLocaleString()
-                  : "Not available"}
-              </p>
-            </div>
-          ))}
+      </div>
+
+      {/* ERROR */}
+
+      {error && (
+        <div className="error-box">
+          ⚠️ {error}
         </div>
       )}
-    </div>
+
+      {/* EMPTY */}
+
+      {!error && history.length === 0 && (
+        <div className="empty-history">
+
+          <div className="empty-icon">
+            💊
+          </div>
+
+          <h3>No medicine analyses yet</h3>
+
+          <p>
+            Upload your first medicine label to start building
+            your medicine history.
+          </p>
+
+        </div>
+      )}
+
+      {/* HISTORY CARDS */}
+
+      {history.length > 0 && (
+        <div className="history-grid">
+
+          {history.map((item) => (
+            <div
+              className="history-card"
+              key={item.id}
+            >
+
+              <div className="history-card-icon">
+                💊
+              </div>
+
+              <div className="history-card-content">
+
+                <span className="history-date">
+                  {item.created_at
+                    ? new Date(item.created_at).toLocaleDateString(
+                        undefined,
+                        {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        }
+                      )
+                    : "Date unavailable"}
+                </span>
+
+                <h3>
+                  {item.medicine_name ||
+                    "Unknown Medicine"}
+                </h3>
+
+                <div className="history-details">
+
+                  <div>
+                    <span>Strength</span>
+                    <strong>
+                      {item.strength ||
+                        "Not available"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Form</span>
+                    <strong>
+                      {item.form ||
+                        "Not available"}
+                    </strong>
+                  </div>
+
+                </div>
+
+                {item.filename && (
+                  <p className="history-file">
+                    📄 {item.filename}
+                  </p>
+                )}
+
+              </div>
+
+            </div>
+          ))}
+
+        </div>
+      )}
+
+    </section>
   );
 }
 

@@ -8,7 +8,6 @@ from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from auth import get_current_user
 from database import Base, engine, get_db
 from models import MedicineAnalysis
 from services.analysis_service import analyze_medicine
@@ -45,10 +44,11 @@ ALLOWED_ORIGINS = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # ---------------------------------------------------------
 # Health check
@@ -68,7 +68,6 @@ def health_check():
 async def analyze_medicine_endpoint(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    user_id: str = Depends(get_current_user),
 ):
     # Check file name
     if not file.filename:
@@ -116,7 +115,6 @@ async def analyze_medicine_endpoint(
 
         print("\n========================================")
         print("Starting medicine analysis")
-        print("User ID:", user_id)
         print("File:", file.filename)
         print("========================================\n")
 
@@ -131,7 +129,7 @@ async def analyze_medicine_endpoint(
         # Save result to database
         # -------------------------------------------------
         analysis = MedicineAnalysis(
-            user_id=user_id,
+            user_id="public",
             filename=file.filename,
 
             medicine_name=medicine_info.medicine_name,
@@ -215,18 +213,17 @@ async def analyze_medicine_endpoint(
 
 
 # ---------------------------------------------------------
-# Get logged-in user's analysis history
+# Get public analysis history
 # ---------------------------------------------------------
 @app.get("/api/history")
 def get_history(
     db: Session = Depends(get_db),
-    user_id: str = Depends(get_current_user),
 ):
     try:
         records = (
             db.query(MedicineAnalysis)
             .filter(
-                MedicineAnalysis.user_id == user_id
+                MedicineAnalysis.user_id == "public"
             )
             .order_by(
                 MedicineAnalysis.created_at.desc()

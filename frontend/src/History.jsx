@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@clerk/clerk-react";
 
 import { getHistory } from "./api";
 
 function History() {
-  const { getToken } = useAuth();
-
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -13,7 +10,7 @@ function History() {
   useEffect(() => {
     async function loadHistory() {
       try {
-        const data = await getHistory(getToken);
+        const data = await getHistory();
 
         setHistory(data.items || []);
       } catch (err) {
@@ -30,14 +27,14 @@ function History() {
     }
 
     loadHistory();
-  }, [getToken]);
+  }, []);
 
   if (loading) {
     return (
       <div className="history-loading">
         <div className="history-spinner"></div>
-        <h2>Loading your medicines...</h2>
-        <p>Please wait while we retrieve your history.</p>
+        <h2>Loading medicine history...</h2>
+        <p>Please wait while we retrieve the history.</p>
       </div>
     );
   }
@@ -54,10 +51,10 @@ function History() {
             📚 Saved Information
           </span>
 
-          <h2>My Medicine History</h2>
+          <h2>Medicine History</h2>
 
           <p>
-            View the medicine labels you have analyzed previously.
+            View the medicine labels that have been analyzed previously.
           </p>
         </div>
 
@@ -88,8 +85,8 @@ function History() {
           <h3>No medicine analyses yet</h3>
 
           <p>
-            Upload your first medicine label to start building
-            your medicine history.
+            Upload a medicine label to start building
+            the medicine history.
           </p>
 
         </div>
